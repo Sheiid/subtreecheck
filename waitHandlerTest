@@ -1,0 +1,109 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
+
+namespace testWaitHandle
+{
+    class Program
+    {
+        static Thread t = new Thread(th);
+        static ConcurrentQueue<int> q = new ConcurrentQueue<int>();
+        static AutoResetEvent e = new AutoResetEvent(false);
+    
+        static void Main(string[] args)
+        {
+            t.Start();
+            //Console.ReadKey();
+            //wait for the signal that comes from thread
+            int a = 0;
+            do
+            {
+                e.WaitOne();
+                int cnt;
+                cnt = q.Count;
+                for (int j = 0; j < cnt; j++)
+                {
+                    q.TryDequeue(out a);
+                    Console.WriteLine("Dequeue : {0}", a);
+                }
+
+                printValues(q);
+
+
+            } while (a != -1);
+
+        }
+
+
+        private static void th()
+        {
+           int num;
+            String name = Thread.CurrentThread.Name;
+            Console.WriteLine("waiting on AutoResetEvent :", name);
+            Console.WriteLine("Insert numbers:");
+
+           // Console.ReadLine();
+
+           /* num = int.Parse(Console.ReadLine());
+            if (num > 0)
+            {
+                q.Enqueue(num);
+                Console.WriteLine("Enqueue : {0}", num);
+                e.Set();
+            }
+            else
+            {
+                Console.Write("DONE");
+                
+            }
+                */
+            //Console.ReadKey();
+            do
+            {
+
+                String str = Console.ReadLine();
+                num = 0;
+                try
+                {
+                    num = Convert.ToInt32(str);
+                    q.Enqueue(num);
+                    Console.WriteLine("Enqueue : {0}", num);
+                    e.Set();
+                } catch(Exception e)
+                {
+                    Console.WriteLine("Exception: " + e.Message);
+                }
+
+            } while (num != -1);
+
+            Console.WriteLine("Exiting..");
+            
+          /*  do
+            {
+              i++;
+            num = Console.Read();
+            Console.WriteLine(" Enqueue : ", num);
+                e.Set();
+
+            } while (num != -1);
+            
+            e.Set();
+            */
+        }
+
+        private static void printValues(ConcurrentQueue<int> q)
+        {
+            foreach(Object obj in q)
+            {
+                Console.WriteLine("{0}",obj);
+            }
+        }
+    }
+}
+
